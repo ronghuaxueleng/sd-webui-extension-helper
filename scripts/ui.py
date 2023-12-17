@@ -44,7 +44,7 @@ def load_extension_list():
                 repo = Repo(repo_path)
                 temp_list.append(repo.active_branch.commit.name_rev)
                 update_onclick = f'''update_extensions("{repo_path}")'''
-                delete_onclick = f'''delete_extensions({repo_path})'''
+                delete_onclick = f'''delete_extensions("{repo_path}")'''
                 buttons = f"""
                         <div style='margin-top: 3px; text-align: center;'>
                             <button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='{update_onclick}'>更新</button>
