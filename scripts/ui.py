@@ -85,6 +85,8 @@ def refrash_list():
 def ui_tab():
     with gr.Blocks(analytics_enabled=False) as ui:
         with gr.Row(elem_id="extension_help_main"):
+            gr.Textbox(label='当前地址', value=extensions_dir)
+        with gr.Row():
             refrash_list_btn = gr.Button(elem_id='refrash_extension_list', value='刷新')
             selected_text = gr.TextArea(elem_id='extension_path', visible=False)
             update_extensions_btn = gr.Button(elem_id='update_extensions_btn', visible=False)
