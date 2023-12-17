@@ -10,7 +10,7 @@ function update_extensions(path) {
 
 function delete_extensions(path) {
     if (confirm('确定要删除这个扩展吗？')) {
-        let textarea = gradioApp().querySelector('#template_id textarea')
+        let textarea = gradioApp().querySelector('#extension_path textarea')
         textarea.value = path
         updateInput(textarea)
         textarea.click()
