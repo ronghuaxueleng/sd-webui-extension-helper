@@ -1,5 +1,6 @@
 import gradio as gr
 
+import base64
 import configparser
 import os
 from git import Repo
@@ -42,9 +43,10 @@ def load_extension_list():
                 url = config_parse(config_path)
                 temp_list.append(url)
                 repo = Repo(repo_path)
+                repo_path_base64 = base64.b64encode(repo_path.encode("utf-8")).decode("utf-8")
                 temp_list.append(repo.active_branch.commit.name_rev)
-                update_onclick = f'''update_extensions("{repo_path}")'''
-                delete_onclick = f'''delete_extensions("{repo_path}")'''
+                update_onclick = f'''update_extensions("{repo_path_base64}")'''
+                delete_onclick = f'''delete_extensions("{repo_path_base64}")'''
                 buttons = f"""
                         <div style='margin-top: 3px; text-align: center;'>
                             <button style='width: 102px;' class='secondary gradio-button svelte-cmf5ev' onclick='{update_onclick}'>更新</button>
@@ -60,19 +62,30 @@ def load_extension_list():
 
 
 def update_extensions(repo_path):
-    if os.path.exists(repo_path):
-        repo = Repo(repo_path)
+    decoded_bytes = base64.b64decode(repo_path)
+    decoded_string = decoded_bytes.decode("utf-8")
+    if os.path.exists(decoded_string):
+        repo = Repo(decoded_string)
         repo.git.pull()
+    return refrash_list()
 
 
 def delete_extensions(repo_path):
-    if os.path.exists(repo_path):
-        shutil.rmtree(repo_path)
+    decoded_bytes = base64.b64decode(repo_path)
+    decoded_string = decoded_bytes.decode("utf-8")
+    if os.path.exists(decoded_string):
+        shutil.rmtree(decoded_string)
+    return refrash_list()
+
+
+def refrash_list():
+    return gr.Dataframe.update(value=load_extension_list())
 
 
 def ui_tab():
     with gr.Blocks(analytics_enabled=False) as ui:
-        with gr.Row(elem_id="prompt_main"):
+        with gr.Row(elem_id="extension_help_main"):
+            refrash_list_btn = gr.Button(elem_id='refrash_extension_list', value='刷新')
             selected_text = gr.TextArea(elem_id='extension_path', visible=False)
             update_extensions_btn = gr.Button(elem_id='update_extensions_btn', visible=False)
             delete_extensions_btn = gr.Button(elem_id='delete_extensions_btn', visible=False)
@@ -91,6 +104,7 @@ def ui_tab():
                                              )
                     update_extensions_btn.click(update_extensions, inputs=selected_text, outputs=datatable)
                     delete_extensions_btn.click(delete_extensions, inputs=selected_text, outputs=datatable)
+                    refrash_list_btn.click(fn=refrash_list, outputs=datatable)
 
         return [(ui, "扩展管理", "extensions_manager")]
 
